@@ -13,4 +13,4 @@ RUN apk update && apk upgrade && apk add --no-cache bash git
 RUN yarn install
 
 EXPOSE 3000
-ENTRYPOINT [ "yarn", "run", "prod" ]
+ENTRYPOINT [ "yarn", "run", "local" ]

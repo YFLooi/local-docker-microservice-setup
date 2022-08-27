@@ -10,7 +10,7 @@ WORKDIR ${WORK_DIR}
 ARG SAMPLE_AUTH_TOKEN
 
 RUN apk update && apk upgrade && apk add --no-cache bash git
-RUN yarn install
+RUN npm install
 
 EXPOSE 3400
 ENTRYPOINT [ "npm", "start" ]
