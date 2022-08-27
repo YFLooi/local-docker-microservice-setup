@@ -1,3 +1,7 @@
 /nestjs-orders-app/node_modules
 /operations-portal/node_modules
 /payment-app/node_modules
+
+/nestjs-orders-app/dist
+/operations-portal/dist
+/payment-app/dist
