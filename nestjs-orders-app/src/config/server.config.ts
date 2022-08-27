@@ -6,7 +6,11 @@ export enum NodeEnvironments {
   LOCAL = 'local',
 }
 
-let mongoCredentialsFromKeyFile: { username: string; password: string };
+let mongoCredentialsFromKeyFile: {
+  username: string;
+  password: string;
+  hostname: string;
+};
 try {
   mongoCredentialsFromKeyFile = require('../../keys/mongo.json');
 } catch (err) {
@@ -38,13 +42,17 @@ namespace ServerConfig {
   export function constructMongoConnection({
     dbUserName = mongoCredentialsFromKeyFile.username,
     dbPassword = mongoCredentialsFromKeyFile.password,
+    dbHostname = mongoCredentialsFromKeyFile.hostname,
     dbName = DB_NAME,
   }: {
     dbUserName?: string;
     dbPassword?: string;
+    dbHostname?: string;
     dbName?: string;
   }): Readonly<string> {
-    return `mongodb+srv://${dbUserName}:${dbPassword}@sandbox.9xeet.mongodb.net/${dbName}?retryWrites=true&w=majority`;
+    return dbUserName && dbPassword && dbHostname
+      ? `mongodb+srv://${dbUserName}:${dbPassword}@${dbHostname}/${dbName}?retryWrites=true&w=majority`
+      : `mongodb://localhost:27017/${dbName}`;
   }
 
   export function getPaymentAppBaseUrl(): Readonly<string> {
