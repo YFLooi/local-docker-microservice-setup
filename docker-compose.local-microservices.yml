@@ -3,12 +3,12 @@ services:
   nestjs-orders-app:
     image: nestjs-orders-app
     build:
-      # Determined relative to nestjs-orders-app Dockerfile
-      context: ../
-      dockerfile: deployment/Dockerfile
+      # Conext set relative to nestjs-orders-app Dockerfile
+      context: nestjs-orders-app
+      dockerfile: ./deployment/Dockerfile
       args:
         SAMPLE_AUTH_TOKEN: token-token
-    # Example env variable definition for run time
+    # Example env variable definition for nestjs-orders-app used at run time
     environment:
       - SAMPLE_ENV=env-variable-string-value
     # Allow attempting restart will ensure api will keep trying until becomes available
@@ -25,26 +25,22 @@ services:
   operations-portal:
     image: operations-portal
     build:
-      context: ../
-      dockerfile: deployment/Dockerfile
-      args:
-        SAMPLE_AUTH_TOKEN: token-token
+      context: operations-portal
+      dockerfile: ./deployment/Dockerfile
     network_mode: host
     volumes:
       - ./operations-portal:/home/node/app
   payment-app:
     image: payment-app
     build:
-      context: ../
-      dockerfile: deployment/Dockerfile
-      args:
-        SAMPLE_AUTH_TOKEN: token-token
+      context: payment-app
+      dockerfile: ./deployment/Dockerfile
     restart: on-failure
     network_mode: host
     volumes:
       - ./payment-app:/home/node/app
   # Ex of getting pre-built image from Dockerhub
-  redis:
-    image: redis:3.0-alpine
-    ports:
-        - "6379:6379"
+  # redis:
+  #   image: redis:3.0-alpine
+  #   ports:
+  #       - "6379:6379"
