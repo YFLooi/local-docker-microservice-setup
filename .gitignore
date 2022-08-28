@@ -5,3 +5,4 @@
 /nestjs-orders-app/dist
 /operations-portal/dist
 /payment-app/dist
+/logging-setup/fluentd/logs/
