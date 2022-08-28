@@ -38,20 +38,17 @@ To increase value:
 # Setup to run log collection with Opensearch
 1. From a terminal in this repo's root folder, start with the following command:
    ```
-    docker-compose -f docker-compose.local-microservices.yml \
-    -f ./logging-setup/docker-compose.yml \
-    up --env-file .env up
-
+    docker compose -f docker-compose.local-microservices.yml -f ./logging-setup/docker-compose.yml --env-file .env up
    ```
    Use `up --detach` to run all this in background
    `--env-file` flag is useful for env variables that apply to all repos
 2. Access opensearch dashboard at http://localhost:5601
-3. Stop with `docker-compose down -v`. `-v` removes all images created
+3. Stop with `docker compose down -v`. `-v` removes all images created
 
-# Use with non-standard docker-compose file names
+# Use with non-standard docker compose file names
 The key is to use `-f` (file flag) to Ex of commands:
-1. Starting docker-compose
-   `docker-compose -f docker-compose.gamification.yml up`
-2. Stopping docker-compose
-   `docker-compose -f docker-compose.gamification.yml down -v`
+1. Starting docker compose
+   `docker compose -f docker compose.gamification.yml up`
+2. Stopping docker compose
+   `docker compose -f docker compose.gamification.yml down -v`
 

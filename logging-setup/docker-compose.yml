@@ -4,7 +4,7 @@ services:
     container_name: fluentd
     user: root
     build:
-      context: ./microservice-run-env/fluentd
+      context: ./logging-setup/fluentd
     image: fluentd
     volumes:
       # Left side refers to PATH to folder in repo, right side of ":" refers to PATH to SAME folder in fluentd Docker container
@@ -13,10 +13,10 @@ services:
       # Container location where dockerhost stores all container logs
       - /var/lib/docker/containers:/fluentd/log/containers
       # Location of all .conf files
-      # Declare this way because this yml will run from root folder context instead of inside /microservice-run-env folder
-      - ./microservice-run-env/fluentd/config:/fluentd/etc/
+      # Declare this way because this yml will run from root folder context instead of inside /logging-setup folder
+      - ./logging-setup/fluentd/config:/fluentd/etc/
       # "/output" is the save location of logs gathered by file-fluent's tail input plugin
-      - ./microservice-run-env/fluentd/logs:/output/
+      - ./logging-setup/fluentd/logs:/output/
     logging:
       driver: 'local'
     network_mode: host
@@ -25,7 +25,7 @@ services:
     image: opensearchproject/logstash-oss-with-opensearch-output-plugin:7.16.2
     container_name: logstash
     volumes:
-      - ./microservice-run-env/logstash/config/logstash.conf:/usr/share/logstash/pipeline.logstash.conf
+      - ./logging-setup/logstash/config/logstash.conf:/usr/share/logstash/pipeline.logstash.conf
     networks:
       - opensearch-net
   opensearch-node1:
