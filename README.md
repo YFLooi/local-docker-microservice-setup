@@ -24,3 +24,5 @@ Add flag `-v` to also remove created volumes
 3. payment-app (PORT 3400)
    Process payments. Randomly decides payment response to mock payment failure
 
+# Running this repo with Fluentd and OpenSearch for to provide a GUI for log handling
+Follow the instructions under logging-setup/README.md
