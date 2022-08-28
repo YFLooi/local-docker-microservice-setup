@@ -1,0 +1,102 @@
+version: '3'
+services:
+  fluentd:
+    container_name: fluentd
+    user: root
+    build:
+      context: ./microservice-run-env/fluentd
+    image: fluentd
+    volumes:
+      # Left side refers to PATH to folder in repo, right side of ":" refers to PATH to SAME folder in fluentd Docker container
+      # Confirm by opening up the container with docker exec -it <<container-id>> /bin/bash -c "touch foo.txt; exec bash"
+
+      # Container location where dockerhost stores all container logs
+      - /var/lib/docker/containers:/fluentd/log/containers
+      # Location of all .conf files
+      # Declare this way because this yml will run from root folder context instead of inside /microservice-run-env folder
+      - ./microservice-run-env/fluentd/config:/fluentd/etc/
+      # "/output" is the save location of logs gathered by file-fluent's tail input plugin
+      - ./microservice-run-env/fluentd/logs:/output/
+    logging:
+      driver: 'local'
+    network_mode: host
+  logstash:
+    # ref: https://opensearch.org/docs/2.0/clients/logstash/index/
+    image: opensearchproject/logstash-oss-with-opensearch-output-plugin:7.16.2
+    container_name: logstash
+    volumes:
+      - ./microservice-run-env/logstash/config/logstash.conf:/usr/share/logstash/pipeline.logstash.conf
+    networks:
+      - opensearch-net
+  opensearch-node1:
+    image: opensearchproject/opensearch:latest
+    container_name: opensearch-node1
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-node1
+      - discovery.seed_hosts=opensearch-node1,opensearch-node2
+      - cluster.initial_master_nodes=opensearch-node1,opensearch-node2
+      - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
+      - 'OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m' # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+      - 'DISABLE_SECURITY_PLUGIN=true' # disables security plugin entirely in OpenSearch by setting plugins.security.disabled: true in opensearch.yml
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536 # maximum number of open files for the OpenSearch user, set to at least 65536 on modern systems
+        hard: 65536
+    volumes:
+      - opensearch-data1:/usr/share/opensearch/data
+    ports:
+      - 9200:9200
+      - 9600:9600 # required for Performance Analyzer
+    expose:
+      - '9200'
+      - '9600'
+    networks:
+      - opensearch-net
+  opensearch-node2:
+    image: opensearchproject/opensearch:latest
+    container_name: opensearch-node2
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-node2
+      - discovery.seed_hosts=opensearch-node1,opensearch-node2
+      - cluster.initial_master_nodes=opensearch-node1,opensearch-node2
+      - bootstrap.memory_lock=true
+      - 'OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m'
+      - 'DISABLE_SECURITY_PLUGIN=true' # disables security plugin entirely in OpenSearch by setting plugins.security.disabled: true in opensearch.yml
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch-data2:/usr/share/opensearch/data
+    networks:
+      - opensearch-net
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.0.0
+    container_name: opensearch-dashboards
+    # ports:
+    #   - 5601:5601
+    # expose:
+    #   - '5601'
+    # networks:
+    #   - opensearch-net
+    network_mode: host
+    environment:
+      # - 'OPENSEARCH_HOSTS:["https://opensearch-node1:9200","https://opensearch-node2:9200"]'
+      # Use http for local run, otherwise will result in ""message":"[ConnectionError]: connect ECONNREFUSED 127.0.0.1:9200"}"
+      - 'OPENSEARCH_HOSTS:["http://opensearch-node1:9200","http://opensearch-node2:9200"]'
+      - 'DISABLE_SECURITY_DASHBOARDS_PLUGIN=true' # disables security dashboards plugin in OpenSearch Dashboards
+
+volumes:
+  opensearch-data1:
+  opensearch-data2:
+
+networks:
+  opensearch-net:
